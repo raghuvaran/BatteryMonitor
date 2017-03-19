@@ -161,8 +161,7 @@ public class MainActivity extends AppCompatActivity {
     void stopMonitoring(){
         unregisterReceiver(myReceiver);
         unregisterReceiver(alert);
-
-        mp.stop();
+//        if(mp != null && mp.isPlaying()) mp.stop();
         Toast.makeText(MainActivity.this, "Stopped monitoring", Toast.LENGTH_SHORT).show();
     }
 
