@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     SeekBar upperSeek;
     SeekBar lowerSeek;
     TextView charge;
+    Button exitBtn;
 
     MyReceiver myReceiver;
     BroadcastReceiver batteryCharging, alert;
@@ -41,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         upperSeek = (SeekBar) findViewById(R.id.upperSeekBar);
         lowerSeek = (SeekBar) findViewById(R.id.lowerSeekBar);
         charge = (TextView) findViewById(R.id.remainingChargeValu);
+        exitBtn = (Button) findViewById(R.id.exitButton);
 
 
 
@@ -72,7 +76,23 @@ public class MainActivity extends AppCompatActivity {
         };
 
 
-
+        exitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mp == null || !mp.isPlaying()){
+                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                    mp = MediaPlayer.create(getApplicationContext(), notification);
+                    mp.start();
+                    Toast.makeText(MainActivity.this, "Started shouting", Toast.LENGTH_SHORT).show();
+                    exitBtn.setText("Stop Playing");
+                }else{
+                    if(mp.isPlaying()) {
+                        mp.stop();
+                        exitBtn.setText("Start Playing");
+                    }
+                }
+            }
+        });
 
 
 
@@ -172,8 +192,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
         unregisterReceiver(batteryCharging);
     }
 }
