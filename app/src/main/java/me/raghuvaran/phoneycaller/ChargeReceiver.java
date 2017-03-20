@@ -22,7 +22,7 @@ public class ChargeReceiver extends BroadcastReceiver {
 
         Toast.makeText(context.getApplicationContext(), "Battery Charge" + String.valueOf(charge), Toast.LENGTH_SHORT).show();
 
-        if(charge > max){
+        if(charge >= max){
             //shout
             Toast.makeText(context.getApplicationContext(), "Reached max:" + String.valueOf(max), Toast.LENGTH_SHORT).show();
             Intent intent1 = new Intent("me.raghuvaran.battery.alert");
