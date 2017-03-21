@@ -1,4 +1,4 @@
-package me.raghuvaran.phoneycaller;
+package me.raghuvaran.batterymonitor;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

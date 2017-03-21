@@ -1,4 +1,4 @@
-package me.raghuvaran.phoneycaller;
+package me.raghuvaran.batterymonitor;
 
 import org.junit.Test;
 
