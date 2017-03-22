@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     String app_name = "Phoney Caller";
 
     ChargeReceiver chargeReceiver;
-    BroadcastReceiver isChargingReceiver, alertReceiver;
+    BroadcastReceiver isConnectedReceiver, alertReceiver;
     private MediaPlayer mp;
 
     @Override
@@ -54,36 +54,21 @@ public class MainActivity extends AppCompatActivity {
 
         //Disable Monitor switch if device is not plugged; No sense if device is not plugged
 
-        {
-            Intent batteryStatus = this.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-            int status = 0;
-            if (batteryStatus != null) {
-                status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-            }
-            boolean isConnected = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                    status == BatteryManager.BATTERY_STATUS_FULL;
-            mainSwitch.setEnabled(isConnected);
-            if(!isConnected) {
-                stopMonitoring();
-            }
-            toggleCheckBoxes();
-        }
 
 
-
-        isChargingReceiver = new BroadcastReceiver() {
+        isConnectedReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                boolean isCharging = intent.getBooleanExtra("isCharging", false);
-                Toast.makeText(MainActivity.this, "Received isCharging "+String.valueOf(isCharging), Toast.LENGTH_SHORT).show();
-                mainSwitch.setEnabled(isCharging);
+                boolean isConnected = isConnected();
+                Toast.makeText(MainActivity.this, "Received isConnected "+String.valueOf(isConnected), Toast.LENGTH_SHORT).show();
+                mainSwitch.setEnabled(isConnected);
                 toggleCheckBoxes();
-                if(!isCharging){
+                if(!isConnected){
                     stopMonitoring();
                 }
             }
         };
-        registerReceiver(isChargingReceiver, new IntentFilter("me.raghuvaran.battery.isCharging"));
+        registerReceiver(isConnectedReceiver, new IntentFilter("me.raghuvaran.battery.isConnected"));
 
 
 
@@ -98,36 +83,6 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-
-//        exitBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if(mp == null || !mp.isPlaying()){
-//                    Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-//                    mp = MediaPlayer.create(getApplicationContext(), notification);
-//                    mp.start();
-//                    Toast.makeText(MainActivity.this, "Started shouting", Toast.LENGTH_SHORT).show();
-//                    exitBtn.setText("Stop Playing");
-//                }else{
-//                    if(mp.isPlaying()) {
-//                        mp.stop();
-//                        exitBtn.setText("Start Playing");
-//                    }
-//                }
-//            }
-//        });
-
-
-
-        //Disable SeekBars by default
-
-
-        //start monitoring if enabled by default
-        if(mainSwitch.isEnabled() && !mainSwitch.isChecked()) {
-            stopMonitoring();
-        }else if(mainSwitch.isEnabled() && mainSwitch.isChecked()){
-            startMonitoring();
-        }
 
         mainSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -182,6 +137,16 @@ public class MainActivity extends AppCompatActivity {
     void toggleSeekBars(){
         upperSeek.setEnabled(upperLimit.isEnabled() && upperLimit.isChecked());
         lowerSeek.setEnabled(lowerLimit.isEnabled() && lowerLimit.isChecked());
+    }
+
+    boolean isConnected(){
+        Intent batteryStatus = this.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        int status = 0;
+        if (batteryStatus != null) {
+            status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+        }
+        return status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                status == BatteryManager.BATTERY_STATUS_FULL;
     }
 
 
@@ -244,28 +209,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-            Intent batteryStatus = this.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-            int status = 0;
-            if (batteryStatus != null) {
-                status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-            }
-            boolean isConnected = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                    status == BatteryManager.BATTERY_STATUS_FULL;
+           boolean isConnected = isConnected();
             mainSwitch.setEnabled(isConnected);
             if(!isConnected) {
                 stopMonitoring();
             }
             toggleCheckBoxes();
+
+        //start monitoring if enabled by default
+        if(mainSwitch.isEnabled() && !mainSwitch.isChecked()) {
+            stopMonitoring();
+        }else if(mainSwitch.isEnabled() && mainSwitch.isChecked()){
+            startMonitoring();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         try {
-            if (isChargingReceiver != null)
-                unregisterReceiver(isChargingReceiver);
+            if (isConnectedReceiver != null)
+                unregisterReceiver(isConnectedReceiver);
         }catch (IllegalArgumentException e){
-            Log.i(app_name,"isChargingReceiver already unregistered");
+            Log.i(app_name,"isConnectedReceiver already unregistered");
         }
         try {
             if (alertReceiver != null)
