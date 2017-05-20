@@ -1,5 +1,7 @@
 package me.raghuvaran.batterymonitor;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +12,7 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -34,6 +37,8 @@ public class MainActivity extends AppCompatActivity {
     ChargeReceiver chargeReceiver;
     BroadcastReceiver isConnectedReceiver, alertReceiver;
     private MediaPlayer mp;
+
+    NotificationManager mNotificationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +70,24 @@ public class MainActivity extends AppCompatActivity {
                 toggleCheckBoxes();
                 if(!isConnected){
                     stopMonitoring();
+                }else{
+                    mNotificationManager =
+                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                    //
+                    android.support.v4.app.NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext())
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setContentTitle("Battery Monitor")
+                            .setContentText("Click here to open Battery Monitor to start charging");
+                    Intent intent2 = new Intent(getApplicationContext(), MainActivity.class);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(
+                            getApplicationContext(),
+                            0,
+                            intent,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+                    mBuilder.setContentIntent(pendingIntent);
+                    mNotificationManager.notify(1, mBuilder.build());
                 }
             }
         };
@@ -176,6 +199,24 @@ public class MainActivity extends AppCompatActivity {
             mp = MediaPlayer.create(getApplicationContext(), notification);
             mp.start();
             Toast.makeText(MainActivity.this, "Started shouting", Toast.LENGTH_SHORT).show();
+            mNotificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            //
+            android.support.v4.app.NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle("Battery Charged")
+                    .setContentText("Battery charge has reached ");
+            Intent intent = new Intent(this, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    this,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+            mBuilder.setContentIntent(pendingIntent);
+            mNotificationManager.notify(2, mBuilder.build());
+
         }
     }
 
